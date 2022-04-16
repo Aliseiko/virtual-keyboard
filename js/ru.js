@@ -1,4 +1,4 @@
-const ruKeys = [
+export default [
   {
     code: 'Backquote',
     default: 'ё',

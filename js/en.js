@@ -1,4 +1,4 @@
-const enKeys = [
+export default [
   {
     code: 'Backquote',
     default: '`',
