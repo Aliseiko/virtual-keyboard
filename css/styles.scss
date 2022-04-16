@@ -1,0 +1,125 @@
+$keysColor: #3a424e;
+$keysColorHover: #94a9c8;
+$keysColorActive: #94a9c8;
+$keysColorActiveShadow: #6586b1;
+$altKeysColor: #1c232e;
+
+.container {
+  margin: 0 auto;
+  font-family: "Trebuchet MS", "Helvetica", sans-serif
+}
+
+.textarea {
+  display: block;
+  width: 700px;
+  height: 200px;
+  margin: 10px auto 10px;
+  padding: 10px;
+  font-size: 18px;
+  color: #000000;
+}
+
+.caseDown, .caseUp, .shiftCaps, .caps {
+  display: block;
+  min-height: 40px
+}
+
+.hidden {
+  display: none
+}
+
+.description, .language, .title {
+  margin: 10px auto;
+  text-align: center
+}
+
+.title {
+  font-size: 30px;
+  color: #1c232e;
+}
+
+.keyboard {
+  display: flex;
+  flex-direction: column;
+  width: 704px;
+  margin: 0 auto;
+  padding: 5px;
+  border: 3px solid #1c232e;
+  border-radius: 5px;
+  background: #c5cbd3;
+  gap: 6px;
+}
+
+.row {
+  display: flex;
+  flex-wrap: nowrap;
+  justify-content: center;
+  height: 40px;
+  gap: 6px;
+}
+
+.key {
+  width: 40px;
+  height: 40px;
+  font-weight: 500;
+  line-height: 40px;
+  text-align: center;
+  color: #ffffff;
+  border-radius: 3px;
+  background: $keysColor;
+  transition: 0.3s;
+  cursor: pointer;
+  user-select: none;
+
+  &:hover {
+    background: $keysColorHover;
+  }
+
+  &.active {
+    background-color: $keysColorActive;
+    box-shadow: $keysColorActiveShadow 1px 1px 3px;
+  }
+}
+
+.AltLeft,
+.AltRight,
+.ArrowUp,
+.ArrowLeft,
+.ArrowDown,
+.ArrowRight,
+.Backspace,
+.CapsLock,
+.ControlLeft,
+.ControlRight,
+.Delete,
+.Enter,
+.ShiftLeft,
+.ShiftRight,
+.Tab,
+.MetaLeft {
+  font-weight: 600;
+  background-color: $altKeysColor;
+}
+
+.Tab {
+  width: 50px
+}
+
+.Backspace,
+.CapsLock,
+.ShiftLeft {
+  width: 100px
+}
+
+.Delete {
+  width: 44px
+}
+
+.Enter,
+.ShiftRight {
+  width: 86px
+}
+
+.Space {
+  width: 330px
+}
