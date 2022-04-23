@@ -13,6 +13,7 @@ const keyMap = [
 export default class Keyboard {
   constructor(langCode) {
     this.currentLang = langCode;
+    this.pressedKeys = [];
   }
 
   init() {
@@ -22,6 +23,8 @@ export default class Keyboard {
     const languageDescription = createElement('p', 'language', null, null, 'Switch language on click: left ctrl + shift');
     const textarea = createElement('textarea', 'textarea');
     document.body.append(title, textarea, keyboard, description, languageDescription);
+    textarea.focus();
+    keyboard.addEventListener('mousedown', this.handleEvents);
   }
 
   createKeyboard() {
@@ -35,5 +38,44 @@ export default class Keyboard {
     });
 
     return keyboard;
+  }
+
+  handleEvents = (e) => {
+    if (!e.target.classList.contains('key')) return;
+    const key = e.target;
+
+    function deactivateKey() {
+      key.classList.remove('active');
+      key.removeEventListener('mouseleave', deactivateKey);
+      key.removeEventListener('mouseup', deactivateKey);
+    }
+
+    e.stopPropagation();
+    key.classList.add('active');
+
+    if (!key.dataset.isFnKey
+        || key.dataset.code === 'ArrowDown'
+        || key.dataset.code === 'ArrowRight'
+        || key.dataset.code === 'ArrowUp'
+        || key.dataset.code === 'ArrowLeft') {
+      this.pressedKeys.push(key.textContent);
+    } else if (key.dataset.code === 'Enter') {
+      this.pressedKeys.push('\n');
+    } else if (key.dataset.code === 'Space') {
+      this.pressedKeys.push(' ');
+    } else if (key.dataset.code === 'Tab') {
+      this.pressedKeys.push('    ');
+    } else if (key.dataset.code === 'Backspace'
+               && this.pressedKeys.length !== 0) {
+      this.pressedKeys.pop();
+    }
+
+    this.showText();
+    key.addEventListener('mouseleave', deactivateKey);
+    key.addEventListener('mouseup', deactivateKey);
+  };
+
+  showText() {
+    document.querySelector('.textarea').value = this.pressedKeys.join('');
   }
 }

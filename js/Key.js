@@ -14,7 +14,10 @@ export default class Key {
 
   createKey() {
     const key = createElement('div', 'key', 'code', this.code, this.small);
-    if (this.isFnKey) key.classList.add(this.code);
+    if (this.isFnKey) {
+      key.classList.add(this.code);
+      key.dataset.isFnKey = 'true';
+    }
     return key;
   }
 }
