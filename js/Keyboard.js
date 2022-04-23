@@ -64,7 +64,7 @@ export default class Keyboard {
     } else if (key.dataset.code === 'Space') {
       this.pressedKeys.push(' ');
     } else if (key.dataset.code === 'Tab') {
-      this.pressedKeys.push('    ');
+      this.pressedKeys.push('\t');
     } else if (key.dataset.code === 'Backspace'
                && this.pressedKeys.length !== 0) {
       this.pressedKeys.pop();
