@@ -61,6 +61,7 @@
   color: #ffffff;
   border-radius: 3px;
   background: #3a424e;
+  box-shadow: #6586b1 2px 2px 3px;
   transition: 0.3s;
   cursor: pointer;
   user-select: none;
@@ -70,7 +71,7 @@
 }
 .key.active {
   background-color: #94a9c8;
-  box-shadow: #6586b1 1px 1px 3px;
+  box-shadow: unset;
 }
 
 .AltLeft,
