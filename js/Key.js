@@ -10,14 +10,10 @@ export default class Key {
     this.shift = languages[langCode].find((el) => el.code === code).shift;
     this.code = code;
     this.isFnKey = fnKeys.includes(code);
-  }
-
-  createKey() {
-    const key = createElement('div', 'key', 'code', this.code, this.small);
+    this.keyHTML = createElement('div', 'key', 'code', this.code, this.small);
     if (this.isFnKey) {
-      key.classList.add(this.code);
-      key.dataset.isFnKey = 'true';
+      this.keyHTML.classList.add(this.code);
+      this.keyHTML.dataset.isFnKey = 'true';
     }
-    return key;
   }
 }

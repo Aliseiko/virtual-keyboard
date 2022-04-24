@@ -14,6 +14,7 @@ export default class Keyboard {
   constructor(langCode) {
     this.currentLang = langCode;
     this.pressedKeys = [];
+    this.keyboardKeysObj = [];
   }
 
   init() {
@@ -21,9 +22,9 @@ export default class Keyboard {
     const keyboard = this.createKeyboard();
     const description = createElement('p', 'description', null, null, 'Keyboard for Windows operating system');
     const languageDescription = createElement('p', 'language', null, null, 'Switch language on click: left ctrl + shift');
-    const textarea = createElement('textarea', 'textarea');
-    document.body.append(title, textarea, keyboard, description, languageDescription);
-    textarea.focus();
+    this.textarea = createElement('textarea', 'textarea');
+    document.body.append(title, this.textarea, keyboard, description, languageDescription);
+    this.textarea.focus();
     keyboard.addEventListener('mousedown', this.handleEvents);
   }
 
@@ -32,7 +33,9 @@ export default class Keyboard {
     keyMap.forEach((rowKeys) => {
       const row = createElement('div', 'row');
       rowKeys.forEach((key) => {
-        row.append(new Key(this.currentLang, key).createKey());
+        const newKey = new Key(this.currentLang, key);
+        this.keyboardKeysObj.push(newKey);
+        row.append(newKey.keyHTML);
       });
       keyboard.append(row);
     });
@@ -70,12 +73,8 @@ export default class Keyboard {
       this.pressedKeys.pop();
     }
 
-    this.showText();
+    this.textarea.value = this.pressedKeys.join('');
     key.addEventListener('mouseleave', deactivateKey);
     key.addEventListener('mouseup', deactivateKey);
   };
-
-  showText() {
-    document.querySelector('.textarea').value = this.pressedKeys.join('');
-  }
 }
