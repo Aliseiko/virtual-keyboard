@@ -60,6 +60,22 @@ export default class Keyboard {
     };
 
     const insertChar = (char) => this.textarea.setRangeText(char, this.textarea.selectionStart, this.textarea.selectionEnd, 'end');
+    const deleteChar = (delKeyCode) => {
+      const cursorPosition = this.textarea.selectionStart;
+
+      if (this.textarea.selectionStart !== this.textarea.selectionEnd) {
+        this.textarea.value = this.textarea.value.slice(0, this.textarea.selectionStart)
+            + this.textarea.value.slice(this.textarea.selectionEnd, this.textarea.value.length);
+      } else if (delKeyCode === 'Backspace' && this.textarea.selectionStart !== 0) {
+        this.textarea.value = this.textarea.value.slice(0, this.textarea.selectionStart - 1)
+            + this.textarea.value.slice(this.textarea.selectionEnd, this.textarea.value.length);
+      } else if (delKeyCode === 'Delete' && this.textarea.selectionEnd !== this.textarea.value.length) {
+        this.textarea.value = this.textarea.value.slice(0, this.textarea.selectionStart)
+            + this.textarea.value.slice(this.textarea.selectionEnd + 1, this.textarea.value.length);
+      }
+      this.textarea.selectionStart = (delKeyCode === 'Backspace') ? cursorPosition - 1 : cursorPosition;
+      this.textarea.selectionEnd = (delKeyCode === 'Backspace') ? cursorPosition - 1 : cursorPosition;
+    };
 
     e.stopPropagation();
     key.classList.add('active');
@@ -70,6 +86,8 @@ export default class Keyboard {
       insertChar(key.textContent);
     } else if (this.specialCharacters[key.dataset.code]) {
       insertChar(this.specialCharacters[key.dataset.code]);
+    } else if (key.dataset.code === 'Backspace' || key.dataset.code === 'Delete') {
+      deleteChar(key.dataset.code);
     }
 
     key.addEventListener('mouseleave', deactivateKey);
