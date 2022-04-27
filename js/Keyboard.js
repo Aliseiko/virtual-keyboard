@@ -18,8 +18,8 @@ export default class Keyboard {
     };
     this.arrowKeys = ['ArrowUp', 'ArrowLeft', 'ArrowDown', 'ArrowRight'];
     this.currentLang = langCode;
-    this.pressedKeys = [];
     this.keyboardKeysObj = [];
+    this.isCaps = false;
   }
 
   init() {
@@ -60,21 +60,32 @@ export default class Keyboard {
     };
 
     const insertChar = (char) => this.textarea.setRangeText(char, this.textarea.selectionStart, this.textarea.selectionEnd, 'end');
+
     const deleteChar = (delKeyCode) => {
       const cursorPosition = this.textarea.selectionStart;
+      const setCursorPosition = (shift = 0) => {
+        this.textarea.selectionStart = cursorPosition - shift;
+        this.textarea.selectionEnd = cursorPosition - shift;
+      };
 
       if (this.textarea.selectionStart !== this.textarea.selectionEnd) {
         this.textarea.value = this.textarea.value.slice(0, this.textarea.selectionStart)
             + this.textarea.value.slice(this.textarea.selectionEnd, this.textarea.value.length);
+        setCursorPosition();
       } else if (delKeyCode === 'Backspace' && this.textarea.selectionStart !== 0) {
         this.textarea.value = this.textarea.value.slice(0, this.textarea.selectionStart - 1)
             + this.textarea.value.slice(this.textarea.selectionEnd, this.textarea.value.length);
+        setCursorPosition(1);
       } else if (delKeyCode === 'Delete' && this.textarea.selectionEnd !== this.textarea.value.length) {
         this.textarea.value = this.textarea.value.slice(0, this.textarea.selectionStart)
             + this.textarea.value.slice(this.textarea.selectionEnd + 1, this.textarea.value.length);
+        setCursorPosition();
       }
-      this.textarea.selectionStart = (delKeyCode === 'Backspace') ? cursorPosition - 1 : cursorPosition;
-      this.textarea.selectionEnd = (delKeyCode === 'Backspace') ? cursorPosition - 1 : cursorPosition;
+    };
+
+    const shiftKeyboard = () => {
+      const keySize = (this.isCaps) ? 'shift' : 'small';
+      this.keyboardKeysObj.forEach((keyObj) => keyObj.keyHTML.textContent = keyObj[keySize]);
     };
 
     e.stopPropagation();
@@ -88,6 +99,9 @@ export default class Keyboard {
       insertChar(this.specialCharacters[key.dataset.code]);
     } else if (key.dataset.code === 'Backspace' || key.dataset.code === 'Delete') {
       deleteChar(key.dataset.code);
+    } else if (key.dataset.code === 'CapsLock') {
+      this.isCaps = (!this.isCaps);
+      shiftKeyboard();
     }
 
     key.addEventListener('mouseleave', deactivateKey);
