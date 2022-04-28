@@ -1,6 +1,7 @@
 /* eslint-disable import/extensions */
 import Key from './Key.js';
 import createElement from './utils/createElement.js';
+import languages from './lang/languages.js';
 
 export default class Keyboard {
   constructor(langCode) {
@@ -17,16 +18,19 @@ export default class Keyboard {
       Tab: '\t',
     };
     this.arrowKeys = ['ArrowUp', 'ArrowLeft', 'ArrowDown', 'ArrowRight'];
+    this.langList = Object.keys(languages);
     this.currentLang = langCode;
     this.keyboardKeysObj = [];
     this.isCaps = false;
+    this.isCtrlPressed = false;
+    this.isAltPressed = false;
   }
 
   init() {
     const title = createElement('h1', 'title', null, null, 'Virtual keyboard');
     const keyboard = this.createKeyboard();
     const description = createElement('p', 'description', null, null, 'Keyboard for Windows operating system');
-    const languageDescription = createElement('p', 'language', null, null, 'Switch language on click: left ctrl + shift');
+    const languageDescription = createElement('p', 'language', null, null, 'Switch language on click: left ctrl + alt');
     this.textarea = createElement('textarea', 'textarea');
     document.body.prepend(title, this.textarea, keyboard, description, languageDescription);
     this.textarea.focus();
@@ -52,10 +56,38 @@ export default class Keyboard {
     if (!e.target.classList.contains('key')) return;
     const key = e.target;
 
+    const rebuildKeyboard = () => {
+      this.keyboardKeysObj.forEach((keyObj) => {
+        keyObj.keyHTML.textContent = languages[this.currentLang].find((el) => el.code === keyObj.code)[(this.isCaps) ? 'shift' : 'small'];
+      });
+    };
+
+    const switchLang = () => {
+      const langIndex = this.langList.indexOf(this.currentLang);
+      this.currentLang = this.langList[(langIndex === this.langList.length - 1)
+        ? 0 : langIndex + 1];
+      rebuildKeyboard();
+    };
+
+    const shiftKeyboard = () => {
+      this.isCaps = (!this.isCaps);
+      rebuildKeyboard();
+    };
+
     const deactivateKey = () => {
-      key.classList.remove('active');
+      if (key.dataset.code !== 'CapsLock'
+          || (key.dataset.code === 'CapsLock' && this.isCaps !== true)) key.classList.remove('active');
       key.removeEventListener('mouseleave', deactivateKey);
       key.removeEventListener('mouseup', deactivateKey);
+      if (key.dataset.code === 'ShiftLeft' || key.dataset.code === 'ShiftRight') {
+        shiftKeyboard();
+      }
+      if (key.dataset.code === 'AltLeft') {
+        this.isAltPressed = false;
+      }
+      if (key.dataset.code === 'ControlLeft') {
+        this.isCtrlPressed = false;
+      }
       this.textarea.focus();
     };
 
@@ -83,11 +115,6 @@ export default class Keyboard {
       }
     };
 
-    const shiftKeyboard = () => {
-      const keySize = (this.isCaps) ? 'shift' : 'small';
-      this.keyboardKeysObj.forEach((keyObj) => keyObj.keyHTML.textContent = keyObj[keySize]);
-    };
-
     e.stopPropagation();
     key.classList.add('active');
     this.textarea.focus();
@@ -99,9 +126,16 @@ export default class Keyboard {
       insertChar(this.specialCharacters[key.dataset.code]);
     } else if (key.dataset.code === 'Backspace' || key.dataset.code === 'Delete') {
       deleteChar(key.dataset.code);
-    } else if (key.dataset.code === 'CapsLock') {
-      this.isCaps = (!this.isCaps);
+    } else if (key.dataset.code === 'ShiftLeft'
+        || key.dataset.code === 'ShiftRight'
+        || key.dataset.code === 'CapsLock') {
       shiftKeyboard();
+    } else if (key.dataset.code === 'ControlLeft') {
+      this.isCtrlPressed = true;
+      if (this.isCtrlPressed && this.isAltPressed) switchLang();
+    } else if (key.dataset.code === 'AltLeft') {
+      this.isAltPressed = true;
+      if (this.isCtrlPressed && this.isAltPressed) switchLang();
     }
 
     key.addEventListener('mouseleave', deactivateKey);
