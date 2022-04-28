@@ -35,6 +35,7 @@ export default class Keyboard {
     document.body.prepend(title, this.textarea, keyboard, description, languageDescription);
     this.textarea.focus();
     keyboard.addEventListener('mousedown', this.handleEvents);
+    document.addEventListener('keydown', this.handleEvents);
   }
 
   createKeyboard() {
@@ -53,8 +54,10 @@ export default class Keyboard {
   }
 
   handleEvents = (e) => {
-    if (!e.target.classList.contains('key')) return;
-    const key = e.target;
+    if (!e.target.classList.contains('key') && !e.code) return;
+    console.log(e.code);
+    e.preventDefault();
+    const key = (e.target.classList.contains('key')) ? e.target : this.keyboardKeysObj.find((el) => el.code === e.code).keyHTML;
 
     const rebuildKeyboard = () => {
       this.keyboardKeysObj.forEach((keyObj) => {
@@ -140,5 +143,6 @@ export default class Keyboard {
 
     key.addEventListener('mouseleave', deactivateKey);
     key.addEventListener('mouseup', deactivateKey);
+    document.addEventListener('keyup', deactivateKey);
   };
 }
