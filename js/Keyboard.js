@@ -54,8 +54,7 @@ export default class Keyboard {
   }
 
   handleEvents = (e) => {
-    if (!e.target.classList.contains('key') && !e.code) return;
-    console.log(e.code);
+    if ((!e.target.classList.contains('key') && !e.code) || e.repeat) return;
     e.preventDefault();
     const key = (e.target.classList.contains('key')) ? e.target : this.keyboardKeysObj.find((el) => el.code === e.code).keyHTML;
 
@@ -69,6 +68,7 @@ export default class Keyboard {
       const langIndex = this.langList.indexOf(this.currentLang);
       this.currentLang = this.langList[(langIndex === this.langList.length - 1)
         ? 0 : langIndex + 1];
+      localStorage.setItem('keyboardLang', this.currentLang);
       rebuildKeyboard();
     };
 
@@ -82,6 +82,7 @@ export default class Keyboard {
           || (key.dataset.code === 'CapsLock' && this.isCaps !== true)) key.classList.remove('active');
       key.removeEventListener('mouseleave', deactivateKey);
       key.removeEventListener('mouseup', deactivateKey);
+      document.removeEventListener('keyup', deactivateKey);
       if (key.dataset.code === 'ShiftLeft' || key.dataset.code === 'ShiftRight') {
         shiftKeyboard();
       }
