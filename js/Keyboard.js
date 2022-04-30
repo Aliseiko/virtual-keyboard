@@ -12,7 +12,7 @@ export default class Keyboard {
       ['ShiftLeft', 'KeyZ', 'KeyX', 'KeyC', 'KeyV', 'KeyB', 'KeyN', 'KeyM', 'Comma', 'Period', 'Slash', 'ArrowUp', 'ShiftRight'],
       ['ControlLeft', 'MetaLeft', 'AltLeft', 'Space', 'AltRight', 'ArrowLeft', 'ArrowDown', 'ArrowRight', 'ControlRight'],
     ];
-    this.specialCharacters = {
+    this.specChars = {
       Enter: '\n',
       Space: ' ',
       Tab: '\t',
@@ -22,8 +22,8 @@ export default class Keyboard {
     this.currentLang = langCode;
     this.keyboardKeysObj = [];
     this.isCaps = false;
-    this.isCtrlPressed = false;
-    this.isAltPressed = false;
+    this.isControlLeftPressed = false;
+    this.isAltLeftPressed = false;
   }
 
   init() {
@@ -36,12 +36,7 @@ export default class Keyboard {
     this.textarea.focus();
     keyboard.addEventListener('mousedown', this.handleEvents);
     document.addEventListener('keydown', this.handleEvents);
-    // keyboard.addEventListener('mouseup', this.handleEvents);
     document.addEventListener('keyup', this.handleEvents);
-    // keyboard.addEventListener('mousedown', this.test);
-    // document.addEventListener('keydown', this.test);
-    // keyboard.addEventListener('mouseup', this.test);
-    // document.addEventListener('keyup', this.test);
   }
 
   createKeyboard() {
@@ -67,9 +62,10 @@ export default class Keyboard {
     try {
       key = (e.target.classList.contains('key')) ? e.target : this.keyboardKeysObj.find((el) => el.code === e.code).keyHTML;
     } catch (err) {
-      key = undefined;
+      return;
     }
-    if (!key) return;
+
+    const keyCode = key.dataset.code;
 
     key.addEventListener('mouseleave', this.handleEvents);
     key.addEventListener('mouseup', this.handleEvents);
@@ -95,17 +91,14 @@ export default class Keyboard {
     };
 
     const deactivateKey = () => {
-      if (key.dataset.code !== 'CapsLock'
-          || (key.dataset.code === 'CapsLock' && this.isCaps !== true)) key.classList.remove('active');
+      if (keyCode !== 'CapsLock'
+          || (keyCode === 'CapsLock' && this.isCaps !== true)) key.classList.remove('active');
 
-      if (key.dataset.code === 'ShiftLeft' || key.dataset.code === 'ShiftRight') {
+      if (['ShiftLeft', 'ShiftRight'].includes(keyCode)) {
         shiftKeyboard();
       }
-      if (key.dataset.code === 'AltLeft') {
-        this.isAltPressed = false;
-      }
-      if (key.dataset.code === 'ControlLeft') {
-        this.isCtrlPressed = false;
+      if (['ControlLeft', 'AltLeft'].includes(keyCode)) {
+        this[`is${keyCode}Pressed`] = false;
       }
       key.removeEventListener('mouseleave', this.handleEvents);
       key.removeEventListener('mouseup', this.handleEvents);
@@ -116,49 +109,48 @@ export default class Keyboard {
 
     const deleteChar = (delKeyCode) => {
       const cursorPosition = this.textarea.selectionStart;
+      const { selectionStart } = this.textarea;
+      const { selectionEnd } = this.textarea;
+      const output = this.textarea.value;
       const setCursorPosition = (shift = 0) => {
-        this.textarea.selectionStart = cursorPosition - shift;
-        this.textarea.selectionEnd = cursorPosition - shift;
+        ['Start', 'End'].forEach((el) => {
+          this.textarea[`selection${el}`] = cursorPosition - shift;
+        });
       };
 
-      if (this.textarea.selectionStart !== this.textarea.selectionEnd) {
-        this.textarea.value = this.textarea.value.slice(0, this.textarea.selectionStart)
-            + this.textarea.value.slice(this.textarea.selectionEnd, this.textarea.value.length);
+      if (selectionStart !== selectionEnd) {
+        this.textarea.value = output.slice(0, selectionStart)
+            + output.slice(selectionEnd, output.length);
         setCursorPosition();
-      } else if (delKeyCode === 'Backspace' && this.textarea.selectionStart !== 0) {
-        this.textarea.value = this.textarea.value.slice(0, this.textarea.selectionStart - 1)
-            + this.textarea.value.slice(this.textarea.selectionEnd, this.textarea.value.length);
+      } else if (delKeyCode === 'Backspace' && selectionStart !== 0) {
+        this.textarea.value = output.slice(0, selectionStart - 1)
+            + output.slice(selectionEnd, output.length);
         setCursorPosition(1);
-      } else if (delKeyCode === 'Delete' && this.textarea.selectionEnd !== this.textarea.value.length) {
-        this.textarea.value = this.textarea.value.slice(0, this.textarea.selectionStart)
-            + this.textarea.value.slice(this.textarea.selectionEnd + 1, this.textarea.value.length);
+      } else if (delKeyCode === 'Delete' && selectionEnd !== output.length) {
+        this.textarea.value = output.slice(0, selectionStart)
+            + output.slice(selectionEnd + 1, output.length);
         setCursorPosition();
       }
     };
 
-    if (e.type === 'mousedown' || e.type === 'keydown') {
+    if (['mousedown', 'keydown'].includes(e.type)) {
       key.classList.add('active');
       this.textarea.focus();
 
       if (!key.dataset.isFnKey
-          || this.arrowKeys.includes(key.dataset.code)) {
+          || this.arrowKeys.includes(keyCode)) {
         insertChar(key.textContent);
-      } else if (this.specialCharacters[key.dataset.code]) {
-        insertChar(this.specialCharacters[key.dataset.code]);
-      } else if (key.dataset.code === 'Backspace' || key.dataset.code === 'Delete') {
-        deleteChar(key.dataset.code);
-      } else if (key.dataset.code === 'ShiftLeft'
-          || key.dataset.code === 'ShiftRight'
-          || key.dataset.code === 'CapsLock') {
+      } else if (this.specChars[keyCode]) {
+        insertChar(this.specChars[keyCode]);
+      } else if (['Backspace', 'Delete'].includes(keyCode)) {
+        deleteChar(keyCode);
+      } else if (['ShiftLeft', 'ShiftRight', 'CapsLock'].includes(keyCode)) {
         shiftKeyboard();
-      } else if (key.dataset.code === 'ControlLeft') {
-        this.isCtrlPressed = true;
-        if (this.isCtrlPressed && this.isAltPressed) switchLang();
-      } else if (key.dataset.code === 'AltLeft') {
-        this.isAltPressed = true;
-        if (this.isCtrlPressed && this.isAltPressed) switchLang();
+      } else if (['ControlLeft', 'AltLeft'].includes(keyCode)) {
+        this[`is${keyCode}Pressed`] = true;
+        if (this.isControlLeftPressed && this.isAltLeftPressed) switchLang();
       }
-    } else if (e.type === 'mouseup' || e.type === 'keyup' || e.type === 'mouseleave') {
+    } else if (['mouseup', 'mouseleave', 'keyup'].includes(e.type)) {
       deactivateKey();
     }
   };
