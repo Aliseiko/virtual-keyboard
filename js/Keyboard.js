@@ -36,6 +36,12 @@ export default class Keyboard {
     this.textarea.focus();
     keyboard.addEventListener('mousedown', this.handleEvents);
     document.addEventListener('keydown', this.handleEvents);
+    // keyboard.addEventListener('mouseup', this.handleEvents);
+    document.addEventListener('keyup', this.handleEvents);
+    // keyboard.addEventListener('mousedown', this.test);
+    // document.addEventListener('keydown', this.test);
+    // keyboard.addEventListener('mouseup', this.test);
+    // document.addEventListener('keyup', this.test);
   }
 
   createKeyboard() {
@@ -54,13 +60,24 @@ export default class Keyboard {
   }
 
   handleEvents = (e) => {
-    if ((!e.target.classList.contains('key') && !e.code) || e.repeat) return;
     e.preventDefault();
-    const key = (e.target.classList.contains('key')) ? e.target : this.keyboardKeysObj.find((el) => el.code === e.code).keyHTML;
+    if ((!e.target.classList.contains('key') && !e.code) || e.repeat) return;
+    e.stopPropagation();
+    let key;
+    try {
+      key = (e.target.classList.contains('key')) ? e.target : this.keyboardKeysObj.find((el) => el.code === e.code).keyHTML;
+    } catch (err) {
+      key = undefined;
+    }
+    if (!key) return;
+
+    key.addEventListener('mouseleave', this.handleEvents);
+    key.addEventListener('mouseup', this.handleEvents);
 
     const rebuildKeyboard = () => {
       this.keyboardKeysObj.forEach((keyObj) => {
-        keyObj.keyHTML.textContent = languages[this.currentLang].find((el) => el.code === keyObj.code)[(this.isCaps) ? 'shift' : 'small'];
+        const k = keyObj;
+        k.keyHTML.textContent = languages[this.currentLang].find((el) => el.code === keyObj.code)[(this.isCaps) ? 'shift' : 'small'];
       });
     };
 
@@ -80,9 +97,7 @@ export default class Keyboard {
     const deactivateKey = () => {
       if (key.dataset.code !== 'CapsLock'
           || (key.dataset.code === 'CapsLock' && this.isCaps !== true)) key.classList.remove('active');
-      key.removeEventListener('mouseleave', deactivateKey);
-      key.removeEventListener('mouseup', deactivateKey);
-      document.removeEventListener('keyup', deactivateKey);
+
       if (key.dataset.code === 'ShiftLeft' || key.dataset.code === 'ShiftRight') {
         shiftKeyboard();
       }
@@ -92,6 +107,8 @@ export default class Keyboard {
       if (key.dataset.code === 'ControlLeft') {
         this.isCtrlPressed = false;
       }
+      key.removeEventListener('mouseleave', this.handleEvents);
+      key.removeEventListener('mouseup', this.handleEvents);
       this.textarea.focus();
     };
 
@@ -119,31 +136,30 @@ export default class Keyboard {
       }
     };
 
-    e.stopPropagation();
-    key.classList.add('active');
-    this.textarea.focus();
+    if (e.type === 'mousedown' || e.type === 'keydown') {
+      key.classList.add('active');
+      this.textarea.focus();
 
-    if (!key.dataset.isFnKey
-        || this.arrowKeys.includes(key.dataset.code)) {
-      insertChar(key.textContent);
-    } else if (this.specialCharacters[key.dataset.code]) {
-      insertChar(this.specialCharacters[key.dataset.code]);
-    } else if (key.dataset.code === 'Backspace' || key.dataset.code === 'Delete') {
-      deleteChar(key.dataset.code);
-    } else if (key.dataset.code === 'ShiftLeft'
-        || key.dataset.code === 'ShiftRight'
-        || key.dataset.code === 'CapsLock') {
-      shiftKeyboard();
-    } else if (key.dataset.code === 'ControlLeft') {
-      this.isCtrlPressed = true;
-      if (this.isCtrlPressed && this.isAltPressed) switchLang();
-    } else if (key.dataset.code === 'AltLeft') {
-      this.isAltPressed = true;
-      if (this.isCtrlPressed && this.isAltPressed) switchLang();
+      if (!key.dataset.isFnKey
+          || this.arrowKeys.includes(key.dataset.code)) {
+        insertChar(key.textContent);
+      } else if (this.specialCharacters[key.dataset.code]) {
+        insertChar(this.specialCharacters[key.dataset.code]);
+      } else if (key.dataset.code === 'Backspace' || key.dataset.code === 'Delete') {
+        deleteChar(key.dataset.code);
+      } else if (key.dataset.code === 'ShiftLeft'
+          || key.dataset.code === 'ShiftRight'
+          || key.dataset.code === 'CapsLock') {
+        shiftKeyboard();
+      } else if (key.dataset.code === 'ControlLeft') {
+        this.isCtrlPressed = true;
+        if (this.isCtrlPressed && this.isAltPressed) switchLang();
+      } else if (key.dataset.code === 'AltLeft') {
+        this.isAltPressed = true;
+        if (this.isCtrlPressed && this.isAltPressed) switchLang();
+      }
+    } else if (e.type === 'mouseup' || e.type === 'keyup' || e.type === 'mouseleave') {
+      deactivateKey();
     }
-
-    key.addEventListener('mouseleave', deactivateKey);
-    key.addEventListener('mouseup', deactivateKey);
-    document.addEventListener('keyup', deactivateKey);
   };
 }
