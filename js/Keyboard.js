@@ -109,8 +109,7 @@ export default class Keyboard {
 
     const deleteChar = (delKeyCode) => {
       const cursorPosition = this.textarea.selectionStart;
-      const { selectionStart } = this.textarea;
-      const { selectionEnd } = this.textarea;
+      const { selectionStart, selectionEnd } = this.textarea;
       const output = this.textarea.value;
       const setCursorPosition = (shift = 0) => {
         ['Start', 'End'].forEach((el) => {
@@ -133,12 +132,37 @@ export default class Keyboard {
       }
     };
 
+    const moveCursor = (arrowKey) => {
+      const cursorPosition = this.textarea.selectionStart;
+      const output = this.textarea.value;
+
+      const calcPosition = () => {
+        const outputRowLength = output.split('\n').map((el, i, arr) => ((arr.length === i + 1) ? el.length : el.length + 1));
+        console.log(outputRowLength)
+
+        let positionRow = 1;
+        let lengthToCursor = 0;
+        let rowLengthSum =
+
+        while (cursorPosition > )
+
+        
+      };
+calcPosition()
+      if (arrowKey === 'ArrowLeft' && cursorPosition !== 0) {
+        this.textarea.selectionStart = cursorPosition - 1;
+        this.textarea.selectionEnd = cursorPosition - 1;
+      } else if (arrowKey === 'ArrowRight' && cursorPosition !== output.length) {
+        this.textarea.selectionStart = cursorPosition + 1;
+        this.textarea.selectionEnd = cursorPosition + 1;
+      }
+    };
+
     if (['mousedown', 'keydown'].includes(e.type)) {
       key.classList.add('active');
       this.textarea.focus();
 
-      if (!key.dataset.isFnKey
-          || this.arrowKeys.includes(keyCode)) {
+      if (!key.dataset.isFnKey) {
         insertChar(key.textContent);
       } else if (this.specChars[keyCode]) {
         insertChar(this.specChars[keyCode]);
@@ -149,6 +173,8 @@ export default class Keyboard {
       } else if (['ControlLeft', 'AltLeft'].includes(keyCode)) {
         this[`is${keyCode}Pressed`] = true;
         if (this.isControlLeftPressed && this.isAltLeftPressed) switchLang();
+      } else if (this.arrowKeys.includes(keyCode)) {
+        moveCursor(keyCode);
       }
     } else if (['mouseup', 'mouseleave', 'keyup'].includes(e.type)) {
       deactivateKey();
