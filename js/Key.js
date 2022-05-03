@@ -6,11 +6,14 @@ const fnKeys = ['AltLeft', 'AltRight', 'ArrowUp', 'ArrowLeft', 'ArrowDown', 'Arr
 
 export default class Key {
   constructor(langCode, code) {
-    this.small = languages[langCode].find((el) => el.code === code).small;
-    this.shift = languages[langCode].find((el) => el.code === code).shift;
+    const findKeyObj = () => languages[langCode].find((el) => el.code === code);
+
+    this.small = findKeyObj().small;
+    this.shift = findKeyObj().shift;
     this.code = code;
     this.isFnKey = fnKeys.includes(code);
     this.keyHTML = createElement('div', 'key', 'code', this.code, this.small);
+
     if (this.isFnKey) {
       this.keyHTML.classList.add(this.code);
       this.keyHTML.dataset.isFnKey = 'true';
