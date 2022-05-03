@@ -93,11 +93,8 @@ export default class Keyboard {
     };
 
     const shiftCapsKeyboard = (keycode) => {
-      if (keycode === 'CapsLock') {
-        this.isCaps = (!this.isCaps);
-      } else {
-        this.isShiftPressed = (!this.isShiftPressed);
-      }
+      const code = (keycode === 'CapsLock') ? 'isCaps' : 'isShiftPressed';
+      this[code] = (!this[code]);
       rebuildKeyboard();
     };
 
