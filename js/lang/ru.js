@@ -284,9 +284,9 @@ export default [
     shift: 'Ctrl',
   },
   {
-    code: 'MetaLeft',
-    small: 'Win',
-    shift: 'Win',
+    code: 'Lang',
+    small: 'Lang',
+    shift: 'Lang',
   },
   {
     code: 'AltLeft',
