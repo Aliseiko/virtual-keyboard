@@ -22,6 +22,7 @@ export default class Keyboard {
     this.currentLang = langCode;
     this.keyboardKeysObj = [];
     this.isCaps = false;
+    this.isShiftPressed = false;
     this.isControlLeftPressed = false;
     this.isAltLeftPressed = false;
   }
@@ -70,9 +71,16 @@ export default class Keyboard {
     key.addEventListener('mouseup', this.handleEvents);
 
     const rebuildKeyboard = () => {
+      const noCapsKeys = (this.isShiftPressed) ? 'shift' : 'small';
+      const capsKeys = ((this.isCaps && !this.isShiftPressed) || (!this.isCaps && this.isShiftPressed)) ? 'shift' : 'small';
+
       this.keyboardKeysObj.forEach((keyObj) => {
+        if (keyObj.isFnKey) return;
         const k = keyObj;
-        k.keyHTML.textContent = languages[this.currentLang].find((el) => el.code === keyObj.code)[(this.isCaps) ? 'shift' : 'small'];
+        k.keyHTML.textContent = languages[this.currentLang]
+          .find((el) => el.code === keyObj.code)[(languages[this.currentLang][0]
+            .noCapsKeys
+            .includes(k.code)) ? noCapsKeys : capsKeys];
       });
     };
 
@@ -84,17 +92,21 @@ export default class Keyboard {
       rebuildKeyboard();
     };
 
-    const shiftKeyboard = () => {
-      this.isCaps = (!this.isCaps);
+    const shiftCapsKeyboard = (keycode) => {
+      if (keycode === 'CapsLock') {
+        this.isCaps = (!this.isCaps);
+      } else {
+        this.isShiftPressed = (!this.isShiftPressed);
+      }
       rebuildKeyboard();
     };
 
     const deactivateKey = () => {
       if (keyCode !== 'CapsLock'
-          || (keyCode === 'CapsLock' && this.isCaps !== true)) key.classList.remove('active');
+          || (keyCode === 'CapsLock' && !this.isCaps)) key.classList.remove('active');
 
       if (['ShiftLeft', 'ShiftRight'].includes(keyCode)) {
-        shiftKeyboard();
+        shiftCapsKeyboard();
       }
       if (['ControlLeft', 'AltLeft'].includes(keyCode)) {
         this[`is${keyCode}Pressed`] = false;
@@ -143,7 +155,7 @@ export default class Keyboard {
       } else if (['Backspace', 'Delete'].includes(keyCode)) {
         deleteChar(keyCode);
       } else if (['ShiftLeft', 'ShiftRight', 'CapsLock'].includes(keyCode)) {
-        shiftKeyboard();
+        shiftCapsKeyboard(keyCode);
       } else if (['ControlLeft', 'AltLeft'].includes(keyCode)) {
         this[`is${keyCode}Pressed`] = true;
         if (this.isControlLeftPressed && this.isAltLeftPressed) switchLang();
