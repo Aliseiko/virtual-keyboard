@@ -100,15 +100,20 @@ export default class Keyboard {
     const shiftCapsKeyboard = (keycode) => {
       const code = (keycode === 'CapsLock') ? 'isCaps' : 'isShiftPressed';
       this[code] = (!this[code]);
+      if (code === 'isShiftPressed' && e.type === 'keydown') {
+        this[code] = true;
+      } else if (code === 'isShiftPressed' && e.type === 'keyup') {
+        this[code] = false;
+      }
       rebuildKeyboard();
     };
 
     const deactivateKey = () => {
-      if (keyCode !== 'CapsLock'
-          || (keyCode === 'CapsLock' && !this.isCaps)) key.classList.remove('active');
+      if (!(['ShiftLeft', 'ShiftRight', 'CapsLock'].includes(keyCode)) || (keyCode === 'CapsLock' && !this.isCaps)
+          || (['ShiftLeft', 'ShiftRight'].includes(keyCode) && (!this.isShiftPressed || e.type === 'keyup'))) key.classList.remove('active');
 
       if (['ShiftLeft', 'ShiftRight'].includes(keyCode)) {
-        shiftCapsKeyboard();
+        if (!['mouseup', 'mouseleave'].includes(e.type)) shiftCapsKeyboard();
       }
       if (['ControlLeft', 'AltLeft'].includes(keyCode)) {
         this[`is${keyCode}Pressed`] = false;
