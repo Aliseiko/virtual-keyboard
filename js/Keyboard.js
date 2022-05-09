@@ -1,4 +1,3 @@
-/* eslint-disable import/extensions */
 import Key from './Key.js';
 import createElement from './utils/createElement.js';
 import languages from './lang/languages.js';
